@@ -1,4 +1,5 @@
 var express = require('express');
+const req = require('express/lib/request');
 var app = express();
 
 var server = app.listen(8081, function()
@@ -128,7 +129,7 @@ app.get('/getProduct', function(request, response)
 //----------------------
 
 //DB
-const todo = 
+var todo = 
 [
 ]
 
@@ -150,14 +151,9 @@ app.get('/addTodo', function(request, response)
     }
     else
     {
-        let todoObject = {
-            id: count++,
-            title: title
-        }
-    
         let todoPreviousLength = todo.length
     
-        todo.push(todoObject)
+        todo.push(getNewTodo(title))
     
         if(todoPreviousLength + 1 === todo.length)
         {
@@ -177,8 +173,6 @@ app.get('/addTodo', function(request, response)
                 })
         }
     }
-
-    
 })
 
 app.get('/getAllTodos', function(request, response)
@@ -192,24 +186,202 @@ app.get('/getAllTodos', function(request, response)
 
 app.get('/editTodo', function(request, response)
 {
-    response.json(
+    //Req param - id, text
+    
+    //validation 
+    //-- param blank --
+    //-- list blank --
+    //-- id exsit or not in the list
+    //-- param[title] if that is equal to existing title -> please provide some different title for todo
+
+    //find todo on the basis of ID --
+    //todo object -> update title --
+    //todo list update -> updated object --
+    //respond with success and list --
+
+    const id = request.query.id
+    const title = request.query.title
+
+    if(id === "" || title === "")
+    {
+        response.json(
+            {
+                status:"Failure",
+                message: "ID or Title cannot be blank!"
+            })
+    }
+    else
+    {
+        if(todo.length === 0)
         {
-            
-        })
+            response.json(
+                {
+                    status:"Failure",
+                    message: "No todo exists in the list!"
+                })
+        }
+        else
+        {
+            let flagFound = 0
+            todo = todo.map(todoTemp => 
+            {
+                if(todoTemp.id === parseInt(id))
+                {
+                    flagFound = 1
+                    todoTemp.title = title
+                    return todoTemp
+                }
+                else
+                {
+                    return todoTemp
+                }
+            })
+
+            if(flagFound === 0)
+            {
+                response.json(
+                    {
+                        status:"Failure",
+                        message: "Todo not found!"
+                    })
+            }
+            else
+            {
+                response.json(
+                    {
+                        status: "Success",
+                        message: "Successfully updated the todo!",
+                        todoList: todo
+                    })
+            }
+        }
+    }
 })
 
 app.get('/deleteTodo', function(request, response)
 {
-    response.json(
+    const id = request.query.id
+    if(id === "")
+    {
+        response.json(
         {
-            
+            status: "Failure",
+            message: "Id cannot be blank!"
         })
+    }
+    else
+    {
+        let flagFound = 0
+        todo = todo.filter(todoTemp => 
+            {
+                if(parseInt(id) === todoTemp.id)    
+                {
+                    flagFound = 1
+                    return false
+                }
+                else
+                {
+                    return true
+                }
+            })
+    
+        if(flagFound === 0)
+        {
+            response.json(
+            {
+                status: "Failiure",
+                message: "Todo cannot be found!",
+                todoList: todo
+            })
+        }
+        else
+        {
+            response.json(
+            {
+                status: "Success",
+                message: "Successfully deleted the Todo!",
+                todoList: todo
+            })
+        }        
+    }    
 })
 
 app.get('/completeTodo', function(request, response)
 {
-    response.json(
+    const id = request.query.id
+    const status = request.query.status
+
+    console.log("id: ", id)
+    console.log("status: ", status)
+
+    if(todo.length === 0)
+    {
+        response.json(
+            {
+                status: "Failure",
+                message: "Please add some todo first!"
+            })
+    }
+    else if(id === "" || status === "")
+    {
+        response.json(
+            {
+                status: "Failure",
+                message: "Please provide valid ID & status"
+            })
+    }
+    else
+    {
+        let flagFound = 0
+        todo = todo.map(tempTodo =>
         {
-            
+            if(tempTodo.id === parseInt(id))
+            {
+                flagFound = 1
+                tempTodo.status = status
+                return tempTodo
+            }
+            else
+            {
+                return tempTodo
+            }
         })
+        if(flagFound === 0)
+        {
+            response.json(
+            {
+                status: "Failure",
+                message: "Todo not found!"
+            })
+        }
+        else
+        {
+            response.json(
+            {
+                status: "Success",
+                message: "Todo updated successfully!",
+                todoList: todo
+            })
+        }   
+    }
 })
+
+function getNewTodo(title)
+{
+    let todoObject = {
+        id: count++,
+        title: title,
+        status: false
+    }
+
+    return todoObject;
+}
+
+// function updateTodo(todo, status)
+// {
+//     todo.status = status
+
+//     return todoObject;
+// }
+
+
