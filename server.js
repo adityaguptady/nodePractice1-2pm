@@ -233,19 +233,6 @@ app.get('/completeTodo1',function(req,res){
 
 app.get('/editTodo', function(request, response)
 {
-    //Req param - id, text
-    
-    //validation 
-    //-- param blank --
-    //-- list blank --
-    //-- id exsit or not in the list
-    //-- param[title] if that is equal to existing title -> please provide some different title for todo
-
-    //find todo on the basis of ID --
-    //todo object -> update title --
-    //todo list update -> updated object --
-    //respond with success and list --
-
     const id = request.query.id
     const title = request.query.title
 
