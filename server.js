@@ -184,6 +184,53 @@ app.get('/getAllTodos', function(request, response)
         })
 })
 
+app.get('/completeTodo1',function(req,res){
+    const id=req.query.id
+    const status=req.query.status
+    if(todo.length===0){
+        res.json(
+            {
+                status:"failure",
+                message:"please add some todo first"
+            })
+    }
+    else if(id===""||status===""){
+        res.json(
+            {
+                status:"failure",
+                message:"please add some todo first"
+            })
+    }
+    else{
+        let flagFound=0
+        todo=todo.map(tempTodo=>{
+            if(tempTodo.id===parseInt(id)){
+                flagFound=1
+                tempTodo.status=status;
+                return tempTodo
+            }
+           else{
+            return tempTodo
+           }
+        })
+        if(flagFound===0){
+            res.json(
+                {
+                status:"failure",
+                message:"todo not found"
+            })
+        }
+        else{
+            res.json(
+                {
+                    status:"success",
+                    message:"todo updated successfully",
+                    todoList:todo
+                })
+        }
+    }
+})
+
 app.get('/editTodo', function(request, response)
 {
     //Req param - id, text
